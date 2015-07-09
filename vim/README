@@ -1,0 +1,9 @@
+there's a .vim directory at the toplevel. It contains two directories, 
+'autoload' and 'bundle'. below 'bundle' 'nerdtree' is cloned from
+
+[remote "origin"]
+  url = https://github.com/scrooloose/nerdtree.git
+  fetch = +refs/heads/*:refs/remotes/origin/*
+
+'autoload' has a copy of nerdtree.vim from nerdtree directory
+

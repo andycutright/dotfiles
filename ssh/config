@@ -1,0 +1,22 @@
+Host batur
+Hostname REAL USER NAME.pairserver.com
+User REAL USER NAME
+
+
+# for zambosa, may not be quite configured 
+Host zambosa01.zambosa.com
+ForwardAgent yes
+
+### working on heroku multiple accounts 
+### not working yet
+Host heroku.pesonal
+  HostName heroku.com
+  IdentityFile ~/.ssh/id_dsa_batur
+  # only offer this identity to heroku.personal
+  IdentitiesOnly yes
+
+Host heroku.work
+    HostName heroku.com
+    IdentityFile ~/.ssh/anythingsocial_new
+    IdentitiesOnly yes
+
