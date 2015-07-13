@@ -103,3 +103,6 @@ silent! let NERDTreeShowHidden=1
 " spelling
 " 'setlocal' affects only the current buffer, as opposed the global 'set'
 " setlocal spell
+
+" map W to w. yay, no more hassles when caps locked
+:command W w
