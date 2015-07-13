@@ -78,15 +78,15 @@ autocmd BufRead *.java set efm=\ %#[javac]\ %#%f:%l:%c:%*\\d:%*\\d:\ %t%[%^:]%#:
 au BufNewFile,BufRead *.pls,*.plsql,*.sql   setf plsql
 
 "pathogen configuration
-execute pathogen#infect()
-filetype plugin indent on
+silent! execute pathogen#infect()  "silent! keeps vim from complaining 
+silent! filetype plugin indent on
 
 "nerdtree
 " autostart vim .. annoying, esp. with mysql \e
 "autocmd vimenter * NERDTree
-nmap <silent> <special> <F2> :NERDTreeToggle<RETURN>
+silent! nmap <silent> <special> <F2> :NERDTreeToggle<RETURN>
 " see the damn dotiles
-let NERDTreeShowHidden=1
+silent! let NERDTreeShowHidden=1
 
 "notes
 "digraphs in insert mode, ^K + characters for digraph, eg CO₂, superscript,
