@@ -22,17 +22,6 @@ Host heroku.work
     IdentityFile ~/.ssh/anythingsocial_new
     IdentitiesOnly yes
 
-# Windows git config
-#Host github.com
-#	Hostname github.com
-#	# path has to be fully qualified, `pwd -W`, or /c/...
-#	# Haven't verified `pwd -W` yet
-#	#IdentityFile c:/Users/Andy/.ssh/anythingsocial_new
-#	IdentityFile /c/Users/Andy/.ssh/anythingsocial_new
-#	#User pulled from standard git protocol 'git@github.com' 
-#	# git remote-url _must_ use git protocol, not HTTPS
-#	User git
-
 Host github.com
   HostName github.com
   User git
