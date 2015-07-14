@@ -1,6 +1,8 @@
 Host batur
-Hostname REAL USER NAME.pairserver.com
-User REAL USER NAME
+  Hostname REAL USER NAME.pairserver.com
+  User REAL USER NAME
+	IdentityFile ~/.ssh/id_dsa_batur
+	IdentitiesOnly yes
 
 
 # for zambosa, may not be quite configured 
@@ -20,3 +22,12 @@ Host heroku.work
     IdentityFile ~/.ssh/anythingsocial_new
     IdentitiesOnly yes
 
+#Host github.com
+#	Hostname github.com
+#	# path has to be fully qualified, `pwd -W`, or /c/...
+#	# Haven't verified `pwd -W` yet
+#	#IdentityFile c:/Users/Andy/.ssh/anythingsocial_new
+#	IdentityFile /c/Users/Andy/.ssh/anythingsocial_new
+#	#User pulled from standard git protocol 'git@github.com' 
+#	# git remote-url _must_ use git protocol, not HTTPS
+#	User git
