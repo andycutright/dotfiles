@@ -82,11 +82,16 @@ silent! execute pathogen#infect()  "silent! keeps vim from complaining
 silent! filetype plugin indent on
 
 "nerdtree
-" autostart vim .. annoying, esp. with mysql \e
-"autocmd vimenter * NERDTree
-silent! nmap <silent> <special> <F2> :NERDTreeToggle<RETURN>
-" see the damn dotiles
-silent! let NERDTreeShowHidden=1
+
+"" NOT_ENABLED 
+"" "autostart vim .. annoying, esp. with mysql \e
+"" "autocmd vimenter * NERDTree
+"" end NOT_ENABLED 
+"" enable when nerdtree installed 
+"silent! nmap <silent> <special> <F2> :NERDTreeToggle<RETURN>
+"" see the damn dotiles
+"silent! let NERDTreeShowHidden=1
+"" enable when nerdtree installed 
 
 "notes
 "digraphs in insert mode, ^K + characters for digraph, eg CO₂, superscript,
