@@ -7,3 +7,14 @@ there's a .vim directory at the toplevel. It contains two directories,
 
 'autoload' has a copy of nerdtree.vim from nerdtree directory
 
+
+
+Tue Aug  4 12:33:44 PDT 2015
+Looks like I need to 
+1. mkdir -p ~/.vim/bundle; cd !:$
+2. git clone git@github.com:scrooloose/nerdtree.git 
+3. mkidr -p ~/.vim/autoload  
+3. cd /tmp ; git clone git@github.com:tpope/vim-pathogen.git
+4. cp vim-pathogen.git/autoload/pathogen.vim ~/.vim/autoload
+
+then edit .vimrc to enable 
