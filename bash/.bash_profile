@@ -45,10 +45,16 @@ export PATH=$PATH:/Users/andy/android-sdk-macosx/tools:/Users/andy/android-sdk-m
 #postgres
 export DBUSER=andy
 
+### tabname stuffage
+# hrmm this should do somehing, but can't remember how to call it
 #functions
 function tabname {
   printf "\e]1;$1\a"
 }
- 
 
+# set the tab name 
+echo -n -e "\033]0;${USER}@${HOSTNAME}\007"
+### END tabname stuffage
+ 
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+
