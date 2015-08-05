@@ -6,5 +6,5 @@
 
 if [ "$SHLVL" = 1 ]; then
     [ -x /usr/bin/clear_console ] && /usr/bin/clear_console -q
-#    printf '\e]0;\a'
+    printf '\e]0;\a'
 fi
