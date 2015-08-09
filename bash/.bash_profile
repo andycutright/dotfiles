@@ -49,7 +49,9 @@ export DBUSER=andy
 # hrmm this should do somehing, but can't remember how to call it
 #functions
 function tabname {
-  printf "\e]1;$1\a"
+  # works on os x 
+  # andy@stumblineddie
+  echo -n -e "\033]0;${USER}@${HOSTNAME}\007"
 }
 
 # set the tab name 
