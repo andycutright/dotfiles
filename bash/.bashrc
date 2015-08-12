@@ -5,3 +5,7 @@
 # PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting 
 # http://stackoverflow.com/questions/22650731/rvm-warning-path-is-not-properly-set-up
 PATH=$GEM_HOME/bin:$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
+# get the ssh client IP
+CLIENT_IP=`echo $SSH_CLIENT|awk '{print $1}'`
+# useful for tunneling
+#alias tunnelme="ssh -R 8080:andy.pws.portal.bz:8080 andy@${CLIENT_IP}"
