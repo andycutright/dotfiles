@@ -87,11 +87,10 @@ silent! filetype plugin indent on
 "" "autostart vim .. annoying, esp. with mysql \e
 "" "autocmd vimenter * NERDTree
 "" end NOT_ENABLED 
-"" enable when nerdtree installed 
-"silent! nmap <silent> <special> <F2> :NERDTreeToggle<RETURN>
-"" see the damn dotiles
-"silent! let NERDTreeShowHidden=1
-"" enable when nerdtree installed 
+
+silent! nmap <silent> <special> <F2> :NERDTreeToggle<RETURN>
+" see the damn dotiles
+silent! let NERDTreeShowHidden=1
 
 "notes
 "digraphs in insert mode, ^K + characters for digraph, eg CO₂, superscript,
@@ -111,3 +110,7 @@ silent! filetype plugin indent on
 
 " map W to w. yay, no more hassles when caps locked
 :command W w
+
+" tags
+" framework is php
+set tags=~/.vim/mytags/framework
