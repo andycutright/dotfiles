@@ -1,3 +1,15 @@
+==-=-++_++_(_+_+)_
+Sat Aug 15 13:37:38 PDT 2015
+maybe not using pathogen properly. pathogen 
+is supposed to manage vim's runtime path,
+so the plugins are loaded 
+
+  https://github.com/tpope/vim-pathogen
+
+
+
+
+==-=-++_++_(_+_+)_
 there's a .vim directory at the toplevel. It contains two directories, 
 'autoload' and 'bundle'. below 'bundle' 'nerdtree' is cloned from
 
@@ -18,3 +30,5 @@ Looks like I need to
 4. cp vim-pathogen.git/autoload/pathogen.vim ~/.vim/autoload
 
 then edit .vimrc to enable 
+
+
