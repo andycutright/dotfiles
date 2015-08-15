@@ -6,7 +6,7 @@ so the plugins are loaded
 
   https://github.com/tpope/vim-pathogen
 
-
+all the plugins should be cloned into ~/.vim/bundle
 
 
 ==-=-++_++_(_+_+)_
