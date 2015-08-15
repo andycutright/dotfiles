@@ -114,3 +114,7 @@ silent! let NERDTreeShowHidden=1
 " tags
 " framework is php
 set tags=~/.vim/mytags/framework
+
+"tagbar
+" map <F8> to TagbarToggle
+nmap [19~ :TagbarToggle
