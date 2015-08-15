@@ -117,4 +117,4 @@ set tags=~/.vim/mytags/framework
 
 "tagbar
 " map <F8> to TagbarToggle
-nmap [19~ :TagbarToggle
+nmap <F8> :TagbarToggle<CR>
