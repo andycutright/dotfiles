@@ -1,0 +1,19 @@
+http://stackoverflow.com/questions/14465383/how-to-navigate-multiple-ctags-matches-in-vim
+
+Ctrl-], and you'll jump to the file and line of its declaration; 
+Ctrl-T then takes you back. 
+If you change the invocation to Ctrl-W ], it will split the current window and open the declaration in the new pane.
+
+!! AUTOCOMPLETE 
+<C-n> and <C-p> are what you're looking for then. They're complete using next match and complete using previous match
+:he ins-completion for the rest (includes spelling and file names). One specific completion I'd like to point out is <C-x><C-o>
+
+g] or CTRL-] will jump to the the implementation 
+
+## dealing with lists 
+:ts – shows the list.
+:tn – goes to the next tag in that list.
+:tp – goes to the previous tag in that list.
+:tf – goes to the function which is in the first of the list.
+:tl – goes to the function which is in the last of the list.
+
