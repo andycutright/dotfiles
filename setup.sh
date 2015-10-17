@@ -13,6 +13,7 @@ check_ssh_agent() {
 config_ctags() {
   if [ ! -e ~/.ctags ]; then
     echo "No .ctags"
+    cp ~/workspace/dotfiles/ctags/.ctags ~/.ctags
   else
     echo ".ctags exists. Not copying"
   fi
