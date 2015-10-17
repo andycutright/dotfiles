@@ -105,6 +105,6 @@ echo
 check_args
 echo
 check_ssh_agent
+config_git
 config_vim
 config_ctags
-config_git
