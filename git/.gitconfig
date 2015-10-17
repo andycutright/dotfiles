@@ -1,6 +1,3 @@
-[user]
-	name = andy
-	email = %REPLACE WITH REAL EMAIL%
 [color]
        ui = auto
        branch = auto

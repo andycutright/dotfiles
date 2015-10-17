@@ -42,12 +42,16 @@ config_git() {
   if [ ! -e ~/.gitconfig ]; then
     echo "No .gitconfig"
     #git config --global 
+    cp ~/workspace/dotfiles/git/.gitconfig ~/.gitconfig
+    git config --global user.name $NAME
+    git config --global user.email $EMAIL
   else
     echo ".gitconfig exists, not copying"
   fi
 
-  if [ ! -d ~/.git_template/hooks ]; then
-    echo No hooks directory
+  if [ ! -d ~/.git_template ]; then
+    echo No template directory
+    cp -r ~/workspace/dotfiles/git/.git_template ~
   else
     echo Hooks directory exists
   fi
