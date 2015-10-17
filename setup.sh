@@ -37,6 +37,7 @@ config_vim() {
 
   if [ ! -e  ~/.vimrc ]; then
     echo "There's no vimrc"
+    cp ~/workspace/dotfiles/vim/.vimrc ~/.vimrc
   else
     echo "vimrc exists"
   fi
