@@ -118,3 +118,6 @@ set tags=~/.vim/mytags/framework
 "tagbar
 " map <F8> to TagbarToggle
 nmap <F8> :TagbarToggle<CR>
+
+" fugitive
+set statusline=%<%f\ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)\ %P

@@ -31,4 +31,14 @@ Looks like I need to
 
 then edit .vimrc to enable 
 
+===)_)(_)))+_+0-=-0-9_)+_)+_--=0-=0=
+Thu Oct 15 16:18:31 UTC 2015
 
+trying out vim-fugitive. have to update the help for it, afterword
+should add to my (non-existent) install script 
+
+  vim -u NONE -c "helptags vim-fugitive/doc" -c q
+
+
+adding https://github.com/tpope/vim-bundler along with 
+https://github.com/tpope/gem-ctags to get tags for gems 

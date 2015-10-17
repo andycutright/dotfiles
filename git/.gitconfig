@@ -29,3 +29,9 @@
 	enabled = 1
 [alias]
 	st = status
+
+[init]
+  templatedir = ~/.git_template
+
+[push]
+   default = simple

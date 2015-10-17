@@ -1,1 +1,33 @@
 Some files need editing with real information
+
+http://tbaggery.com/2011/08/08/effortless-ctags-with-git.html
+  
+  # create a template for every git repo
+  # does this get pushed out even when cloning? 
+  git config --global init.templatedir '~/.git_template'
+  mkdir -p ~/.git_template/hooks
+
+
+then cp the ./hooks directory to ~/.git_template
+
+
+.... ?? and how do i add them to existing repos? 
+
+
+testing this out, follow the pattern 
+established by a fresh init
+
+  Initialized empty Git repository in /home/andy/workspace/junk/.git/
+  andy@ip-172-31-0-145:~/workspace/junk$ ls
+  andy@ip-172-31-0-145:~/workspace/junk$ find .
+  .
+  ./.git
+  ./.git/hooks
+  ./.git/hooks/post-merge
+  ./.git/hooks/post-commit
+  ./.git/hooks/ctags
+  ./.git/hooks/post-checkout
+  ./.git/refs
+
+
+so clone does add the hooks
