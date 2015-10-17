@@ -27,6 +27,9 @@ config_vim() {
   fi
 
   if [ ! -d ~/.vim/autoload ]; then
+    cd ~/workspace && git clone git@github.com:tpope/vim-pathogen.git
+    mkdir -p ~/.vim/autoload
+    cp ~/workspace/vim-pathogen/autoload/pathogen.vim ~/.vim/autoload/pathogen.vim
     echo No autoload directory
   else
     echo Autoload directory exists
@@ -42,7 +45,6 @@ config_vim() {
 config_git() {
   if [ ! -e ~/.gitconfig ]; then
     echo "No .gitconfig"
-    #git config --global 
     cp ~/workspace/dotfiles/git/.gitconfig ~/.gitconfig
     git config --global user.name $NAME
     git config --global user.email $EMAIL
@@ -54,7 +56,7 @@ config_git() {
     echo No template directory
     cp -r ~/workspace/dotfiles/git/.git_template ~
   else
-    echo Hooks directory exists
+    echo git template directory exists
   fi
 }
 
