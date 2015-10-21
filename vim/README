@@ -45,3 +45,10 @@ https://github.com/tpope/gem-ctags to get tags for gems
 
 also adding https://github.com/tpope/gem-browse to pop up a vim instance
 to brows gem libraries
+
+
+Tue Oct 20 22:23:34 UTC 2015
+indentation guides for haml
+  https://github.com/nathanaelkane/vim-indent-guides
+
+<Leader> is typically the '\', so type \ig to toggle the guidlines
