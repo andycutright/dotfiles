@@ -38,3 +38,10 @@ trying out vim-fugitive. have to update the help for it, afterword
 should add to my (non-existent) install script 
 
   vim -u NONE -c "helptags vim-fugitive/doc" -c q
+
+
+adding https://github.com/tpope/vim-bundler along with 
+https://github.com/tpope/gem-ctags to get tags for gems 
+
+also adding https://github.com/tpope/gem-browse to pop up a vim instance
+to brows gem libraries
