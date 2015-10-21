@@ -16,7 +16,6 @@ alias scure='env |grep SSH_AGENT_PID && ssh-add -l'
 alias sycli='/usr/local/bin/synergy/synergyc --name chewbarktop anysocial'
 alias rmine='open /Applications/RubyMine.app'
 alias ensafen='ssh-add ~/.ssh/id_dsa_batur ~/.ssh/anythingsocial_new'
-alias ti='open /Applications/Titanium\ Studio/TitaniumStudio.app'
 alias gobatur='ssh batur'
 
 #iPhone / Xcode
@@ -28,8 +27,7 @@ alias rememc='launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.memcached.pl
 alias remongo='launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.mongodb.plist ; launchctl load ~/Library/LaunchAgents/homebrew.mxcl.mongodb.plist'
 
 # general process / ruby stuff
-alias init_log='shug ; tail -f log/* | grep DEV'
-alias testdb='RAILS_ENV=test rails db'
+alias testdb='RAILS_ENV=test rails db -p'
 
 #heroku
 alias ku='heroku'
@@ -37,26 +35,16 @@ alias ku='heroku'
 #android development
 export PATH=$PATH:/Users/andy/android-sdk-macosx/tools:/Users/andy/android-sdk-macosx/platform-tools
 
-#titanium
-
-#play 
-#export PATH=/Users/andy/opt/play-2.0.2:$PATH
-
 #postgres
 export DBUSER=andy
 
-### tabname stuffage
-# hrmm this should do somehing, but can't remember how to call it
 #functions
 function tabname {
   # works on os x 
-  # andy@stumblineddie
+  # <someusername>@<hostname>
   echo -n -e "\033]0;${USER}@${HOSTNAME}\007"
 }
 
 # set the tab name 
-echo -n -e "\033]0;${USER}@${HOSTNAME}\007"
-### END tabname stuffage
- 
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
-
+# for remote boxes
+#echo -n -e "\033]0;${USER}@${HOSTNAME}\007"
