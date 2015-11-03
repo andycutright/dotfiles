@@ -47,6 +47,7 @@ config_vim() {
     cd ~/.vim/bunlder && git clone git@github.com:scrooloose/nerdtree.git
     ##HAML indentation 
     cd ~/.vim/bunlder && git clone git@github.com:nathanaelkane/vim-indent-guides.git
+    cd ~/.vim/bunlder && git clone git@github.com:tpope/vim-rails.git
   else
     echo Bundle directory exists
   fi
