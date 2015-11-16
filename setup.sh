@@ -39,15 +39,15 @@ config_vim() {
 
   if [ ! -d  ~/.vim/bundle ]; then
     echo No bundle directory
-    mkdir -p ~/.vim/bundler
+    mkdir -p ~/.vim/bundle
     ## for ruby dev, needs gem install gem-ctags
-    cd ~/.vim/bundler && git clone git@github.com:tpope/vim-bundler.git
+    cd ~/.vim/bundle && git clone git@github.com:tpope/vim-bundler.git
     ###TODO update the fugitive help file 
-    cd ~/.vim/bundler && git clone git@github.com:tpope/vim-fugitive.git
-    cd ~/.vim/bunlder && git clone git@github.com:scrooloose/nerdtree.git
+    cd ~/.vim/bundle && git clone git@github.com:tpope/vim-fugitive.git
+    cd ~/.vim/bundle && git clone git@github.com:scrooloose/nerdtree.git
     ##HAML indentation 
-    cd ~/.vim/bunlder && git clone git@github.com:nathanaelkane/vim-indent-guides.git
-    cd ~/.vim/bunlder && git clone git@github.com:tpope/vim-rails.git
+    cd ~/.vim/bundle && git clone git@github.com:nathanaelkane/vim-indent-guides.git
+    cd ~/.vim/bundle && git clone git@github.com:tpope/vim-rails.git
   else
     echo Bundle directory exists
   fi
