@@ -121,3 +121,6 @@ nmap <F8> :TagbarToggle<CR>
 
 " fugitive
 set statusline=%<%f\ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)\ %P
+
+" Markdown
+au BufNewFile,BufFilePre,BufRead *.md set filetype=markdown
