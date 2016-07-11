@@ -59,6 +59,7 @@ config_git() {
     cp ~/workspace/dotfiles/git/.gitconfig ~/.gitconfig
     git config --global user.name $NAME
     git config --global user.email $EMAIL
+    git config --global core.editor "vim"
   else
     echo ".gitconfig exists, not copying"
   fi
