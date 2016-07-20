@@ -124,6 +124,7 @@ set statusline=%<%f\ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)\ %P
 
 " Markdown
 au BufNewFile,BufFilePre,BufRead *.md set filetype=markdown
+au BufNewFile,BufFilePre,BufRead *.sql set filetype=sql
 
 " Match do/end ruby, etc.
 runtime macros/matchit.vim
