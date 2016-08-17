@@ -5,7 +5,7 @@
 * Assumes an ssh-agent is running, but you can probably edit that out of setup.sh
 * setup.sh is preferred installer method
     
-    /> setup.sh -name "<Name to use for commits>" -email "<email for git commits>"
+    /> setup.sh -name "\<Name to use for commits\>" -email "\<email for git commits\>"
     
 Read setup.sh, to see the vim plugins installed. Read the listed plugin repos to see how to use them
 
