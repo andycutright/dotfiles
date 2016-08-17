@@ -9,4 +9,11 @@
     
 Read setup.sh, to see the vim plugins installed. Read the listed plugin repos to see how to use them
 
+Set rbenv after running setup.sh. This script assumes you have the the appropriate dependencies installed
+
+    # This will output instructions on updating your shell initialization scripts
+    # Follow the instructions to ensure your environment is properly configured
+    # after installing rbenv
+    /> rbenv.setup.sh
+
 This is tested on unixy boxes, and OS X. Not tested on cygwin 
