@@ -1,12 +1,13 @@
 #!/bin/bash
 DOTFILE_ROOT=~/workspace/dotfiles
+GCP='git@github.com:'
 
 check_ssh_agent() {
   if env | grep --quiet SSH_AUTH_SOCK ; then
     echo SSH agent is running
   else
-    echo SSH agent is _not running. I refuse to continue
-    exit 1
+    GCP='https://github.com/'
+    echo SSH agent is _not running. Reconfiguring GCP
   fi
 }
 
@@ -22,7 +23,7 @@ config_ctags() {
 config_vim() {
 
   if [ ! -d ~/.vim/autoload ]; then
-    cd ~/workspace && git clone git@github.com:tpope/vim-pathogen.git
+    cd ~/workspace && git clone ${GCP}tpope/vim-pathogen.git
     mkdir -p ~/.vim/autoload
     cp ~/workspace/vim-pathogen/autoload/pathogen.vim ~/.vim/autoload/pathogen.vim
     echo No autoload directory
@@ -41,13 +42,13 @@ config_vim() {
     echo No bundle directory
     mkdir -p ~/.vim/bundle
     ## for ruby dev, needs gem install gem-ctags
-    cd ~/.vim/bundle && git clone git@github.com:tpope/vim-bundler.git
+    cd ~/.vim/bundle && git clone ${GCP}tpope/vim-bundler.git
     ###TODO update the fugitive help file 
-    cd ~/.vim/bundle && git clone git@github.com:tpope/vim-fugitive.git
-    cd ~/.vim/bundle && git clone git@github.com:scrooloose/nerdtree.git
+    cd ~/.vim/bundle && git clone ${GCP}tpope/vim-fugitive.git
+    cd ~/.vim/bundle && git clone ${GCP}scrooloose/nerdtree.git
     ##HAML indentation 
-    cd ~/.vim/bundle && git clone git@github.com:nathanaelkane/vim-indent-guides.git
-    cd ~/.vim/bundle && git clone git@github.com:tpope/vim-rails.git
+    cd ~/.vim/bundle && git clone ${GCP}nathanaelkane/vim-indent-guides.git
+    cd ~/.vim/bundle && git clone ${GCP}tpope/vim-rails.git
   else
     echo Bundle directory exists
   fi
