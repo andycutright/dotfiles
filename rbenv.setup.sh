@@ -28,7 +28,7 @@ echo ''
 echo 'You might need to logout & login to have the changes to take effect'
 
 echo 'Manual stuff you MUST DO:'
-echo '  1. Install a ruby, e.g. rbenv installl2.2.1'
+echo '  1. Install a ruby, e.g. rbenv install 2.6.5'
 echo '  2. Edit ~/.rbenv/version to ensure you are using that version, or use rbenv global to select a version'
 echo '  3. Rbenv rehash after those steps'
 echo '  4. Install a local copy of bundle, e.g. gem bundle install'
