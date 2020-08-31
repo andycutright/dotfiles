@@ -73,6 +73,10 @@ config_git() {
   fi
 }
 
+config_screen() {
+  cp ~/workspace/dotfiles/screen/.screenrc ~
+}
+
 check_args()
 {
   if test $NAME
@@ -120,3 +124,4 @@ check_ssh_agent
 config_git
 config_vim
 config_ctags
+config_screen
