@@ -32,3 +32,14 @@ echo '  1. Install a ruby, e.g. rbenv install 2.6.5'
 echo '  2. Edit ~/.rbenv/version to ensure you are using that version, or use rbenv global to select a version'
 echo '  3. Rbenv rehash after those steps'
 echo '  4. Install a local copy of bundle, e.g. gem install bundle'
+
+## Notes
+# Git pull to update the list 
+# $ rbenv install 2.1.2
+# ruby-build: definition not found: 2.1.2
+# 
+# You can list all available versions with `rbenv install --list'.
+# 
+# If the version you're looking for is not present, first try upgrading
+# ruby-build. If it's still missing, open a request on the ruby-build
+# issue tracker: https://github.com/sstephenson/ruby-build/issues
