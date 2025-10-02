@@ -128,3 +128,6 @@ au BufNewFile,BufFilePre,BufRead *.sql set filetype=sql
 
 " Match do/end ruby, etc.
 runtime macros/matchit.vim
+
+" turn off markdown recommended style
+let g:markdown_recommended_style = 0
