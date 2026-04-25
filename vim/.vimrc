@@ -131,3 +131,6 @@ runtime macros/matchit.vim
 
 " turn off markdown recommended style
 let g:markdown_recommended_style = 0
+
+" fix typescript parsing problems
+set regexpengine=2
