@@ -74,10 +74,10 @@ def get_token(cfg):
     die("no token: set $JIRA_API_TOKEN or set 'op_token_ref' in config")
 
 
-def request(cfg, method, path, body=None, params=None):
+def request(cfg, method, path, body=None, params=None, api="2"):
     tok = get_token(cfg)
     auth = base64.b64encode(f"{cfg['email']}:{tok}".encode()).decode()
-    url = f"https://{cfg['site']}/rest/api/2{path}"
+    url = f"https://{cfg['site']}/rest/api/{api}{path}"
     if params:
         url += "?" + urllib.parse.urlencode(params)
     data = json.dumps(body).encode() if body is not None else None
@@ -125,9 +125,10 @@ TABLE_FIELDS = "summary,status,priority,updated,assignee"
 
 
 def _search(cfg, jql, fields=TABLE_FIELDS, max_results=50):
-    res = request(cfg, "GET", "/search", params={
-        "jql": jql, "fields": fields, "maxResults": max_results,
-    })
+    # /rest/api/2/search was removed (Atlassian CHANGE-2046); use the v3
+    # enhanced-search endpoint: POST /search/jql, fields as an array.
+    body = {"jql": jql, "fields": fields.split(","), "maxResults": max_results}
+    res = request(cfg, "POST", "/search/jql", body=body, api="3")
     return res.get("issues", []) if res else []
 
 
