@@ -1,0 +1,11 @@
+{
+  "_comment": "Copy to ~/.config/jira/config.json and fill in. This file is committed to a PUBLIC repo, so it holds placeholders only. Never put the API token here or in any committed file — the token comes from $JIRA_API_TOKEN or `op read op_token_ref`.",
+  "site": "YOURORG.atlassian.net",
+  "email": "you@example.com",
+  "op_token_ref": "op://<vault>/<item>/<field>",
+  "account_self": "<your-atlassian-accountId>",
+  "cloudId": "<optional-cloud-id-for-reference>",
+  "sprint_field": "customfield_10020",
+  "default_project": "PROJ",
+  "board_id": null
+}

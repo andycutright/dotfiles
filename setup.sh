@@ -77,6 +77,20 @@ config_screen() {
   cp ~/workspace/dotfiles/screen/.screenrc ~
 }
 
+config_workagent() {
+  mkdir -p ~/.local/bin ~/.config/jira
+  # symlink (not copy) so edits in the repo are live on this machine
+  ln -sf $DOTFILE_ROOT/workagent/bin/jira ~/.local/bin/jira
+  echo "linked jira -> ~/.local/bin/jira"
+  if [ ! -e ~/.config/jira/config.json ]; then
+    echo "No jira config"
+    cp $DOTFILE_ROOT/workagent/config.example.json ~/.config/jira/config.json
+    echo "seeded ~/.config/jira/config.json (fill in site/email/op_token_ref)"
+  else
+    echo "jira config exists, not copying"
+  fi
+}
+
 check_args()
 {
   if test $NAME
@@ -125,3 +139,4 @@ config_git
 config_vim
 config_ctags
 config_screen
+config_workagent
