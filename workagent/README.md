@@ -18,6 +18,38 @@ machine state — this playbook only *points* at it.
 | `AGENT.md` | The portable operating playbook (Phase 2). |
 | `harness/` | Thin per-harness pointers to `AGENT.md` (paste into each tool's user config). |
 
+## Quickstart (new user)
+
+Cloning gives you the tools plus a starting playbook. The two things **you** supply are
+your own `~/.config/jira/config.json` and your own API token — no private context is
+inherited.
+
+**Prereqs:** `python3`, `~/.local/bin` on your `PATH`, and either the 1Password CLI `op`
+(signed in) or a `$JIRA_API_TOKEN` env var. `gh` optional (for GitHub work).
+
+1. **Clone to the expected path** (scripts assume it):
+   ```sh
+   git clone <repo-url> ~/workspace/dotfiles
+   ```
+2. **Install** — minimal (see [Install](#install) for the `setup.sh` alternative):
+   ```sh
+   mkdir -p ~/.local/bin ~/.config/jira
+   ln -sf ~/workspace/dotfiles/workagent/bin/jira ~/.local/bin/jira
+   cp ~/workspace/dotfiles/workagent/config.example.json ~/.config/jira/config.json
+   ```
+3. **Create an Atlassian API token** (see [Auth](#auth-no-secret-in-the-repo)) and store it
+   in your 1Password, or export it as `$JIRA_API_TOKEN`.
+4. **Fill in `~/.config/jira/config.json`** with your values: `site`, `email`,
+   `op_token_ref`, `default_project`, `sprint_field` (default `customfield_10020` — verify
+   for your instance), optional `board_id`. `account_self` you can grab from `jira me`.
+5. **Test:** `jira me` then `jira mine`.
+6. **Wire your harness(es)** to the playbook (see [harness/](harness)):
+   - Claude Code: add `@~/workspace/dotfiles/workagent/AGENT.md` to `~/.claude/CLAUDE.md`
+   - Cursor: add a **User** rule pointing at `~/workspace/dotfiles/workagent/AGENT.md`
+   - Gemini CLI: add the same pointer to `~/.gemini/GEMINI.md`
+7. **(Optional) personalize `AGENT.md`** — it encodes one person's working-style
+   preferences and briefing habits; adjust to taste. Nothing sensitive to strip.
+
 ## Install
 
 `setup.sh` (repo root) wires this up: it symlinks `bin/jira` into `~/.local/bin`
