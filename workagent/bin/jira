@@ -35,6 +35,7 @@ import urllib.parse
 import urllib.request
 
 CONFIG_FILE = os.path.expanduser(os.environ.get("JIRA_CONFIG", "~/.config/jira/config.json"))
+REQUEST_TIMEOUT = 15  # seconds, for both HTTP calls and `op read`
 
 
 def die(msg):
@@ -64,11 +65,14 @@ def get_token(cfg):
     if ref:
         try:
             out = subprocess.run(
-                ["op", "read", ref], capture_output=True, text=True, check=True
+                ["op", "read", ref], capture_output=True, text=True, check=True,
+                timeout=REQUEST_TIMEOUT,
             )
             return out.stdout.strip()
         except FileNotFoundError:
             die("op CLI not found, and $JIRA_API_TOKEN is unset")
+        except subprocess.TimeoutExpired:
+            die(f"`op read {ref}` timed out after {REQUEST_TIMEOUT}s")
         except subprocess.CalledProcessError as e:
             die(f"`op read {ref}` failed: {(e.stderr or '').strip()}")
     die("no token: set $JIRA_API_TOKEN or set 'op_token_ref' in config")
@@ -86,7 +90,7 @@ def request(cfg, method, path, body=None, params=None, api="2"):
     req.add_header("Content-Type", "application/json")
     req.add_header("Accept", "application/json")
     try:
-        with urllib.request.urlopen(req) as resp:
+        with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
             raw = resp.read().decode()
             return json.loads(raw) if raw else None
     except urllib.error.HTTPError as e:
@@ -109,7 +113,7 @@ def agile_request(cfg, method, path, body=None, params=None):
     req.add_header("Content-Type", "application/json")
     req.add_header("Accept", "application/json")
     try:
-        with urllib.request.urlopen(req) as resp:
+        with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
             raw = resp.read().decode()
             return json.loads(raw) if raw else None
     except urllib.error.HTTPError as e:
@@ -124,12 +128,31 @@ def agile_request(cfg, method, path, body=None, params=None):
 TABLE_FIELDS = "summary,status,priority,updated,assignee"
 
 
-def _search(cfg, jql, fields=TABLE_FIELDS, max_results=50):
+def _q(v):
+    """Escape a value for use as a single URL path segment."""
+    return urllib.parse.quote(str(v), safe="")
+
+
+def _search(cfg, jql, fields=TABLE_FIELDS, max_results=1000, page_size=100):
     # /rest/api/2/search was removed (Atlassian CHANGE-2046); use the v3
-    # enhanced-search endpoint: POST /search/jql, fields as an array.
-    body = {"jql": jql, "fields": fields.split(","), "maxResults": max_results}
-    res = request(cfg, "POST", "/search/jql", body=body, api="3")
-    return res.get("issues", []) if res else []
+    # enhanced-search endpoint: POST /search/jql, fields as an array. That
+    # endpoint paginates via nextPageToken/isLast rather than startAt/total,
+    # so loop until either is exhausted or we hit max_results.
+    issues = []
+    next_token = None
+    while True:
+        body = {"jql": jql, "fields": fields.split(","), "maxResults": page_size}
+        if next_token:
+            body["nextPageToken"] = next_token
+        res = request(cfg, "POST", "/search/jql", body=body, api="3") or {}
+        issues.extend(res.get("issues", []))
+        next_token = res.get("nextPageToken")
+        if len(issues) >= max_results or res.get("isLast", True) or not next_token:
+            break
+    if len(issues) > max_results:
+        issues = issues[:max_results]
+        print(f"warning: results capped at {max_results}; more may exist", file=sys.stderr)
+    return issues
 
 
 def _fmt_row(it):
@@ -197,7 +220,7 @@ def _fmt_comment(c):
 
 def cmd_issue(args):
     cfg = load_config()
-    it = request(cfg, "GET", f"/issue/{args.key}", params={
+    it = request(cfg, "GET", f"/issue/{_q(args.key)}", params={
         "fields": "summary,status,priority,assignee,reporter,updated,description,comment",
     })
     f = it.get("fields", {})
@@ -220,7 +243,7 @@ def cmd_issue(args):
 
 def cmd_comments(args):
     cfg = load_config()
-    res = request(cfg, "GET", f"/issue/{args.key}/comment")
+    res = request(cfg, "GET", f"/issue/{_q(args.key)}/comment")
     comments = res.get("comments", []) if res else []
     human = "\n\n".join(_fmt_comment(c) for c in comments) or "(no comments)"
     emit(args, human, comments)
@@ -228,13 +251,13 @@ def cmd_comments(args):
 
 def cmd_comment(args):
     cfg = load_config()
-    c = request(cfg, "POST", f"/issue/{args.key}/comment", body={"body": args.text})
+    c = request(cfg, "POST", f"/issue/{_q(args.key)}/comment", body={"body": args.text})
     emit(args, f"commented on {args.key} (id {c.get('id')})", c)
 
 
 def cmd_transition(args):
     cfg = load_config()
-    res = request(cfg, "GET", f"/issue/{args.key}/transitions")
+    res = request(cfg, "GET", f"/issue/{_q(args.key)}/transitions")
     trans = res.get("transitions", []) if res else []
     want = args.state.lower()
     match = None
@@ -246,7 +269,7 @@ def cmd_transition(args):
     if not match:
         avail = ", ".join(f"{t.get('name')}→{(t.get('to') or {}).get('name')}" for t in trans)
         die(f"no transition matching {args.state!r} on {args.key}. available: {avail}")
-    request(cfg, "POST", f"/issue/{args.key}/transitions",
+    request(cfg, "POST", f"/issue/{_q(args.key)}/transitions",
             body={"transition": {"id": match["id"]}})
     emit(args, f"{args.key} → {(match.get('to') or {}).get('name')}", match)
 
@@ -254,7 +277,7 @@ def cmd_transition(args):
 def cmd_assign(args):
     cfg = load_config()
     acct = _resolve_who(cfg, args.who)
-    request(cfg, "PUT", f"/issue/{args.key}/assignee", body={"accountId": acct})
+    request(cfg, "PUT", f"/issue/{_q(args.key)}/assignee", body={"accountId": acct})
     emit(args, f"{args.key} assigned to {acct}", {"key": args.key, "accountId": acct})
 
 
@@ -263,7 +286,7 @@ def cmd_worklog(args):
     body = {"timeSpentSeconds": int(args.dur) * 60}
     if args.comment:
         body["comment"] = args.comment
-    w = request(cfg, "POST", f"/issue/{args.key}/worklog", body=body)
+    w = request(cfg, "POST", f"/issue/{_q(args.key)}/worklog", body=body)
     emit(args, f"logged {args.dur}m on {args.key} (id {w.get('id')})", w)
 
 
@@ -272,60 +295,67 @@ def cmd_sprint_add(args):
     board = cfg.get("board_id")
     if not board:
         die("no 'board_id' in config; needed to find the active sprint")
-    res = agile_request(cfg, "GET", f"/board/{board}/sprint", params={"state": "active"})
+    res = agile_request(cfg, "GET", f"/board/{_q(board)}/sprint", params={"state": "active"})
     sprints = res.get("values", []) if res else []
     if not sprints:
         die(f"no active sprint on board {board}")
     sid = sprints[0]["id"]
-    agile_request(cfg, "POST", f"/sprint/{sid}/issue", body={"issues": [args.key]})
+    agile_request(cfg, "POST", f"/sprint/{_q(sid)}/issue", body={"issues": [args.key]})
     emit(args, f"{args.key} added to sprint {sprints[0].get('name')} (id {sid})",
          {"key": args.key, "sprint": sid})
 
 
 def main():
-    p = argparse.ArgumentParser(prog="jira", description="Minimal Jira Cloud v2 CLI")
-    p.add_argument("--json", action="store_true", help="raw API output")
+    # --json is defined on this shared parent AND passed to every subparser
+    # below, so it parses in either position: `jira --json mine` or
+    # `jira mine --json`.
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("--json", action="store_true", help="raw API output")
+
+    p = argparse.ArgumentParser(
+        prog="jira", description="Minimal Jira Cloud v2 CLI", parents=[common]
+    )
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    sub.add_parser("me").set_defaults(func=cmd_me)
-    sub.add_parser("mine").set_defaults(func=cmd_mine)
-    sub.add_parser("sprint").set_defaults(func=cmd_sprint)
+    sub.add_parser("me", parents=[common]).set_defaults(func=cmd_me)
+    sub.add_parser("mine", parents=[common]).set_defaults(func=cmd_mine)
+    sub.add_parser("sprint", parents=[common]).set_defaults(func=cmd_sprint)
 
-    sp = sub.add_parser("search")
+    sp = sub.add_parser("search", parents=[common])
     sp.add_argument("jql")
     sp.add_argument("--max", type=int, default=50)
     sp.set_defaults(func=cmd_search)
 
-    sp = sub.add_parser("issue")
+    sp = sub.add_parser("issue", parents=[common])
     sp.add_argument("key")
     sp.set_defaults(func=cmd_issue)
 
-    sp = sub.add_parser("comments")
+    sp = sub.add_parser("comments", parents=[common])
     sp.add_argument("key")
     sp.set_defaults(func=cmd_comments)
 
-    sp = sub.add_parser("comment")
+    sp = sub.add_parser("comment", parents=[common])
     sp.add_argument("key")
     sp.add_argument("text")
     sp.set_defaults(func=cmd_comment)
 
-    sp = sub.add_parser("transition")
+    sp = sub.add_parser("transition", parents=[common])
     sp.add_argument("key")
     sp.add_argument("state")
     sp.set_defaults(func=cmd_transition)
 
-    sp = sub.add_parser("assign")
+    sp = sub.add_parser("assign", parents=[common])
     sp.add_argument("key")
     sp.add_argument("who", nargs="?", default="me")
     sp.set_defaults(func=cmd_assign)
 
-    sp = sub.add_parser("worklog")
+    sp = sub.add_parser("worklog", parents=[common])
     sp.add_argument("key")
     sp.add_argument("--dur", required=True, help="minutes")
     sp.add_argument("--comment")
     sp.set_defaults(func=cmd_worklog)
 
-    sp = sub.add_parser("sprint-add")
+    sp = sub.add_parser("sprint-add", parents=[common])
     sp.add_argument("key")
     sp.set_defaults(func=cmd_sprint_add)
 
