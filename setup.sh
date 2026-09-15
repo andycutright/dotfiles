@@ -89,6 +89,10 @@ config_workagent() {
   else
     echo "jira config exists, not copying"
   fi
+
+  mkdir -p ~/.claude/skills
+  ln -sf $DOTFILE_ROOT/workagent/skills/admin-assistant ~/.claude/skills/admin-assistant
+  echo "linked admin-assistant skill -> ~/.claude/skills/admin-assistant"
 }
 
 check_args()
