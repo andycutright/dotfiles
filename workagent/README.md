@@ -17,6 +17,7 @@ machine state — this playbook only *points* at it.
 | `config.example.json` | Placeholder Jira config. Copy to `~/.config/jira/config.json` and fill in. |
 | `AGENT.md` | The portable operating playbook (Phase 2). |
 | `harness/` | Thin per-harness pointers to `AGENT.md` (paste into each tool's user config). |
+| `skills/admin-assistant/` | Claude Code Skill: on-demand admin-only persona (Jira/email/calendar/Toggl, no repo/AWS mutations). Symlinked to `~/.claude/skills/admin-assistant`, invoke with `/admin-assistant`. |
 
 ## Quickstart (new user)
 
