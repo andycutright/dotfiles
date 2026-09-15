@@ -108,6 +108,8 @@ jira transition KEY "In Progress"    move status (matched by transition or targe
 jira assign KEY [me|ACCOUNT_ID]      (re)assign; default me
 jira worklog KEY --dur MIN [--comment "..."]
 jira sprint-add KEY                  add to the board's active sprint
+jira create "summary" [--project KEY] [--type Task] [--parent KEY] [--description "..."]
+                                      create a new issue (defaults to config's default_project / type Task)
 ```
 
 Add `--json` to any command for the raw API object; the default output is terse and

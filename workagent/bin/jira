@@ -18,6 +18,7 @@ Commands:
   jira assign KEY [me|ACCOUNT_ID]      # (re)assign; default me
   jira worklog KEY --dur MIN [--comment "..."]
   jira sprint-add KEY                  # add issue to the board's active sprint
+  jira create "summary" [--project KEY] [--type Task] [--parent KEY] [--description "..."]
 
 Add --json to any command for the raw API object.
 
@@ -36,6 +37,7 @@ import urllib.request
 
 CONFIG_FILE = os.path.expanduser(os.environ.get("JIRA_CONFIG", "~/.config/jira/config.json"))
 REQUEST_TIMEOUT = 15  # seconds, for both HTTP calls and `op read`
+_token_cache = None  # resolved once per process; every request()/agile_request() call reuses it
 
 
 def die(msg):
@@ -58,9 +60,13 @@ def load_config():
 
 
 def get_token(cfg):
+    global _token_cache
+    if _token_cache is not None:
+        return _token_cache
     tok = os.environ.get("JIRA_API_TOKEN")
     if tok:
-        return tok.strip()
+        _token_cache = tok.strip()
+        return _token_cache
     ref = cfg.get("op_token_ref")
     if ref:
         try:
@@ -68,7 +74,8 @@ def get_token(cfg):
                 ["op", "read", ref], capture_output=True, text=True, check=True,
                 timeout=REQUEST_TIMEOUT,
             )
-            return out.stdout.strip()
+            _token_cache = out.stdout.strip()
+            return _token_cache
         except FileNotFoundError:
             die("op CLI not found, and $JIRA_API_TOKEN is unset")
         except subprocess.TimeoutExpired:
@@ -290,6 +297,24 @@ def cmd_worklog(args):
     emit(args, f"logged {args.dur}m on {args.key} (id {w.get('id')})", w)
 
 
+def cmd_create(args):
+    cfg = load_config()
+    project = args.project or cfg.get("default_project") or die(
+        "no project: pass --project or set 'default_project' in config"
+    )
+    fields = {
+        "project": {"key": project},
+        "issuetype": {"name": args.type},
+        "summary": args.summary,
+    }
+    if args.description:
+        fields["description"] = args.description
+    if args.parent:
+        fields["parent"] = {"key": args.parent}
+    it = request(cfg, "POST", "/issue", body={"fields": fields})
+    emit(args, f"created {it.get('key')}", it)
+
+
 def cmd_sprint_add(args):
     cfg = load_config()
     board = cfg.get("board_id")
@@ -358,6 +383,14 @@ def main():
     sp = sub.add_parser("sprint-add", parents=[common])
     sp.add_argument("key")
     sp.set_defaults(func=cmd_sprint_add)
+
+    sp = sub.add_parser("create", parents=[common])
+    sp.add_argument("summary")
+    sp.add_argument("--project", help="defaults to config's default_project")
+    sp.add_argument("--type", default="Task", help="issue type name (default: Task)")
+    sp.add_argument("--description")
+    sp.add_argument("--parent", help="parent issue key (e.g. an Epic)")
+    sp.set_defaults(func=cmd_create)
 
     args = p.parse_args()
     args.func(args)
