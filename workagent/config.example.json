@@ -7,5 +7,6 @@
   "cloudId": "<optional-cloud-id-for-reference>",
   "sprint_field": "customfield_10020",
   "default_project": "PROJ",
-  "board_id": null
+  "board_id": null,
+  "token_cache_ttl_seconds": 900
 }

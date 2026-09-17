@@ -70,8 +70,13 @@ ln -sf ~/workspace/dotfiles/workagent/bin/jira ~/.local/bin/jira
 The `jira` CLI resolves its API token in order:
 
 1. `$JIRA_API_TOKEN` (handy for CI / headless)
-2. `op read <op_token_ref>` — the `op_token_ref` in your local config points at a
-   1Password item field.
+2. an in-process cache — one `op read` per invocation, no matter how many API calls it makes
+3. an on-disk cache at `~/.cache/jira/token` (mode `0600`), so a burst of separate `jira`
+   commands run close together only triggers one 1Password prompt. TTL default 900s,
+   override with `token_cache_ttl_seconds` in config or `$JIRA_TOKEN_CACHE_TTL`; set either
+   to `0` to disable the on-disk cache entirely
+4. `op read <op_token_ref>` — the `op_token_ref` in your local config points at a
+   1Password item field; the result is written to the on-disk cache for next time
 
 Create an Atlassian API token at <https://id.atlassian.com/manage-profile/security/api-tokens>,
 store it in 1Password, and set `op_token_ref` in `~/.config/jira/config.json` to that
@@ -89,7 +94,8 @@ Non-secret instance config, kept out of the repo:
   "account_self": "<your-accountId>",
   "sprint_field": "customfield_10020",
   "default_project": "PROJ",
-  "board_id": null
+  "board_id": null,
+  "token_cache_ttl_seconds": 900
 }
 ```
 

@@ -4,7 +4,11 @@
 Config (non-secret) is read from $JIRA_CONFIG or ~/.config/jira/config.json.
 The API token is NEVER stored in the repo. Token resolution order:
   1. $JIRA_API_TOKEN
-  2. `op read <op_token_ref>`   (1Password, ref taken from config)
+  2. in-process cache (one `op read` per invocation, however many API calls it makes)
+  3. on-disk cache at $JIRA_TOKEN_CACHE or ~/.cache/jira/token, mode 0600, TTL-bound
+     (config's token_cache_ttl_seconds or $JIRA_TOKEN_CACHE_TTL, default 900s; 0 disables)
+  4. `op read <op_token_ref>`   (1Password, ref taken from config) -- result written to
+     the on-disk cache for the next invocation
 
 Commands:
   jira me                              # whoami (auth check)
@@ -31,6 +35,8 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -38,6 +44,14 @@ import urllib.request
 CONFIG_FILE = os.path.expanduser(os.environ.get("JIRA_CONFIG", "~/.config/jira/config.json"))
 REQUEST_TIMEOUT = 15  # seconds, for both HTTP calls and `op read`
 _token_cache = None  # resolved once per process; every request()/agile_request() call reuses it
+
+_default_cache_dir = os.path.join(
+    os.environ.get("XDG_CACHE_HOME") or os.path.expanduser("~/.cache"), "jira"
+)
+TOKEN_CACHE_FILE = os.path.expanduser(
+    os.environ.get("JIRA_TOKEN_CACHE", os.path.join(_default_cache_dir, "token"))
+)
+DEFAULT_TOKEN_CACHE_TTL = 900  # seconds; keeps a burst of commands from re-prompting 1Password
 
 
 def die(msg):
@@ -59,6 +73,53 @@ def load_config():
     return cfg
 
 
+def _token_cache_ttl(cfg):
+    env = os.environ.get("JIRA_TOKEN_CACHE_TTL")
+    if env is not None:
+        try:
+            return int(env)
+        except ValueError:
+            pass
+    return cfg.get("token_cache_ttl_seconds", DEFAULT_TOKEN_CACHE_TTL)
+
+
+def _read_token_cache(cfg, ref):
+    """Best-effort read; any problem just means 'no usable cache', never an error."""
+    ttl = _token_cache_ttl(cfg)
+    if ttl <= 0:
+        return None
+    try:
+        with open(TOKEN_CACHE_FILE) as f:
+            data = json.load(f)
+        if data.get("op_token_ref") != ref:
+            return None
+        if time.time() - float(data["resolved_at"]) >= ttl:
+            return None
+        tok = data.get("token")
+        return tok.strip() if tok else None
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
+def _write_token_cache(token, ref):
+    """Best-effort write; a failure here should never break the command itself."""
+    try:
+        cache_dir = os.path.dirname(TOKEN_CACHE_FILE)
+        os.makedirs(cache_dir, exist_ok=True)
+        os.chmod(cache_dir, 0o700)
+        fd, tmp_path = tempfile.mkstemp(dir=cache_dir)
+        try:
+            os.chmod(tmp_path, 0o600)
+            with os.fdopen(fd, "w") as f:
+                json.dump({"token": token, "op_token_ref": ref, "resolved_at": time.time()}, f)
+            os.replace(tmp_path, TOKEN_CACHE_FILE)
+        except BaseException:
+            os.unlink(tmp_path)
+            raise
+    except OSError:
+        pass
+
+
 def get_token(cfg):
     global _token_cache
     if _token_cache is not None:
@@ -68,6 +129,10 @@ def get_token(cfg):
         _token_cache = tok.strip()
         return _token_cache
     ref = cfg.get("op_token_ref")
+    cached = _read_token_cache(cfg, ref) if ref else None
+    if cached:
+        _token_cache = cached
+        return _token_cache
     if ref:
         try:
             out = subprocess.run(
@@ -75,6 +140,8 @@ def get_token(cfg):
                 timeout=REQUEST_TIMEOUT,
             )
             _token_cache = out.stdout.strip()
+            if _token_cache_ttl(cfg) > 0:
+                _write_token_cache(_token_cache, ref)
             return _token_cache
         except FileNotFoundError:
             die("op CLI not found, and $JIRA_API_TOKEN is unset")
