@@ -42,7 +42,8 @@ import urllib.parse
 import urllib.request
 
 CONFIG_FILE = os.path.expanduser(os.environ.get("JIRA_CONFIG", "~/.config/jira/config.json"))
-REQUEST_TIMEOUT = 15  # seconds, for both HTTP calls and `op read`
+REQUEST_TIMEOUT = 15  # seconds, for HTTP calls
+OP_READ_TIMEOUT = 90  # seconds, for `op read`; covers an interactive 1Password unlock
 _token_cache = None  # resolved once per process; every request()/agile_request() call reuses it
 
 _default_cache_dir = os.path.join(
@@ -137,7 +138,7 @@ def get_token(cfg):
         try:
             out = subprocess.run(
                 ["op", "read", ref], capture_output=True, text=True, check=True,
-                timeout=REQUEST_TIMEOUT,
+                timeout=OP_READ_TIMEOUT,
             )
             _token_cache = out.stdout.strip()
             if _token_cache_ttl(cfg) > 0:
@@ -146,7 +147,7 @@ def get_token(cfg):
         except FileNotFoundError:
             die("op CLI not found, and $JIRA_API_TOKEN is unset")
         except subprocess.TimeoutExpired:
-            die(f"`op read {ref}` timed out after {REQUEST_TIMEOUT}s")
+            die(f"`op read {ref}` timed out after {OP_READ_TIMEOUT}s")
         except subprocess.CalledProcessError as e:
             die(f"`op read {ref}` failed: {(e.stderr or '').strip()}")
     die("no token: set $JIRA_API_TOKEN or set 'op_token_ref' in config")
