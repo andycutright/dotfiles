@@ -398,6 +398,27 @@ def cmd_sprint_add(args):
          {"key": args.key, "sprint": sid})
 
 
+def cmd_sprints(args):
+    cfg = load_config()
+    board = args.board or cfg.get("board_id")
+    if not board:
+        die("no board id: pass --board or set 'board_id' in config")
+    sprints, start = [], 0
+    while True:
+        res = agile_request(cfg, "GET", f"/board/{_q(board)}/sprint",
+                            params={"state": args.state, "startAt": start, "maxResults": 50}) or {}
+        vals = res.get("values", [])
+        sprints.extend(vals)
+        start += len(vals)
+        if res.get("isLast", True) or not vals:
+            break
+    human = "\n".join(
+        f"{s['id']}\t{s.get('state', '?')}\t{(s.get('startDate') or '-')[:10]}\t"
+        f"{(s.get('endDate') or '-')[:10]}\t{s.get('name', '')}" for s in sprints
+    ) or "(no sprints)"
+    emit(args, human, sprints)
+
+
 def main():
     # --json is defined on this shared parent AND passed to every subparser
     # below, so it parses in either position: `jira --json mine` or
@@ -447,6 +468,12 @@ def main():
     sp.add_argument("--dur", required=True, help="minutes")
     sp.add_argument("--comment")
     sp.set_defaults(func=cmd_worklog)
+
+    sp = sub.add_parser("sprints", parents=[common], help="list board sprints with dates")
+    sp.add_argument("--state", default="active,future",
+                    help="comma list of future,active,closed (default: active,future)")
+    sp.add_argument("--board", help="board id (defaults to config's board_id)")
+    sp.set_defaults(func=cmd_sprints)
 
     sp = sub.add_parser("sprint-add", parents=[common])
     sp.add_argument("key")
