@@ -18,6 +18,7 @@ Commands:
   jira issue KEY                       # one issue: fields + description + recent comments
   jira comments KEY                    # comments only
   jira comment KEY "text"              # add a comment
+  jira edit KEY --description "..."    # replace an issue's description
   jira transition KEY "In Progress"    # move status (matched by name)
   jira assign KEY [me|ACCOUNT_ID]      # (re)assign; default me
   jira worklog KEY --dur MIN [--comment "..."]
@@ -330,6 +331,19 @@ def cmd_comment(args):
     emit(args, f"commented on {args.key} (id {c.get('id')})", c)
 
 
+def cmd_edit(args):
+    cfg = load_config()
+    fields = {}
+    if args.description is not None:
+        fields["description"] = args.description
+    if args.summary is not None:
+        fields["summary"] = args.summary
+    if not fields:
+        die("nothing to edit: pass --description and/or --summary")
+    request(cfg, "PUT", f"/issue/{_q(args.key)}", body={"fields": fields})
+    emit(args, f"updated {args.key} ({', '.join(fields)})", {"key": args.key, "fields": fields})
+
+
 def cmd_transition(args):
     cfg = load_config()
     res = request(cfg, "GET", f"/issue/{_q(args.key)}/transitions")
@@ -452,6 +466,12 @@ def main():
     sp.add_argument("key")
     sp.add_argument("text")
     sp.set_defaults(func=cmd_comment)
+
+    sp = sub.add_parser("edit", parents=[common])
+    sp.add_argument("key")
+    sp.add_argument("--description")
+    sp.add_argument("--summary")
+    sp.set_defaults(func=cmd_edit)
 
     sp = sub.add_parser("transition", parents=[common])
     sp.add_argument("key")
