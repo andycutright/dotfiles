@@ -34,6 +34,7 @@ import argparse
 import base64
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -283,7 +284,55 @@ def cmd_sprint(args):
 
 def cmd_search(args):
     cfg = load_config()
-    issues = _search(cfg, args.jql, max_results=args.max)
+    jql = args.jql
+    scope = []
+    if args.project:
+        scope.append(f"project = {_project_key(args.project)}")
+    if args.type:
+        scope.append(f'issuetype = "{args.type}"')
+    if scope:
+        if not jql:
+            jql = " AND ".join(scope)
+        elif "order by" in jql.lower():
+            # keep ORDER BY outside the parenthesised filter
+            i = jql.lower().index("order by")
+            body, order = jql[:i].strip(), jql[i:]
+            jql = " AND ".join(scope + ([f"({body})"] if body else [])) + " " + order
+        else:
+            jql = " AND ".join(scope + [f"({jql})"])
+    if not jql:
+        die("search needs JQL, or --project/--type")
+    issues = _search(cfg, jql, max_results=args.max)
+    emit(args, _rows(issues), issues)
+
+
+def _project_key(v):
+    if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]+", v):
+        die(f"invalid project key: {v!r}")
+    return v.upper()
+
+
+def cmd_epics(args):
+    cfg = load_config()
+    project = args.project or cfg.get("default_project") or die(
+        "no project: pass --project or set 'default_project' in config"
+    )
+    jql = f"project = {_project_key(project)} AND issuetype = Epic"
+    if args.status == "open":
+        jql += " AND statusCategory != Done"
+    elif args.status != "all":
+        jql += f' AND status = "{args.status}"'
+    jql += " ORDER BY key DESC"
+    issues = _search(cfg, jql, max_results=args.max)
+    emit(args, _rows(issues), issues)
+
+
+def cmd_epic(args):
+    cfg = load_config()
+    if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]+-\d+", args.key):
+        die(f"invalid issue key: {args.key!r}")
+    issues = _search(cfg, f"parent = {args.key.upper()} ORDER BY key",
+                     max_results=args.max)
     emit(args, _rows(issues), issues)
 
 
@@ -297,9 +346,11 @@ def _fmt_comment(c):
 def cmd_issue(args):
     cfg = load_config()
     it = request(cfg, "GET", f"/issue/{_q(args.key)}", params={
-        "fields": "summary,status,priority,assignee,reporter,updated,description,comment",
+        "fields": "summary,status,priority,assignee,reporter,updated,description,comment,issuetype,parent",
     })
     f = it.get("fields", {})
+    itype = (f.get("issuetype") or {}).get("name", "?")
+    parent = (f.get("parent") or {}).get("key")
     assignee = (f.get("assignee") or {}).get("displayName", "Unassigned")
     status = (f.get("status") or {}).get("name", "?")
     pri = (f.get("priority") or {}).get("name", "-")
@@ -307,6 +358,7 @@ def cmd_issue(args):
     tail = comments[-3:]
     human = (
         f"{it.get('key')}  {f.get('summary','')}\n"
+        f"type: {itype}" + (f"   parent: {parent}" if parent else "") + "\n"
         f"status: {status}   priority: {pri}   assignee: {assignee}   "
         f"updated: {(f.get('updated') or '')[:16].replace('T',' ')}\n\n"
         f"{(f.get('description') or '(no description)').strip()}\n"
@@ -450,9 +502,24 @@ def main():
     sub.add_parser("sprint", parents=[common]).set_defaults(func=cmd_sprint)
 
     sp = sub.add_parser("search", parents=[common])
-    sp.add_argument("jql")
-    sp.add_argument("--max", type=int, default=50)
+    sp.add_argument("jql", nargs="?", help="JQL; optional if --project/--type given")
+    sp.add_argument("--project", "--prefix", dest="project",
+                    help="project key (the issue-key prefix, e.g. NETE)")
+    sp.add_argument("--type", help="issue type name (e.g. Epic)")
+    sp.add_argument("--max", type=int, default=50, help="max results (default 50)")
     sp.set_defaults(func=cmd_search)
+
+    sp = sub.add_parser("epics", parents=[common], help="list epics in a project")
+    sp.add_argument("--project", help="project key (defaults to config's default_project)")
+    sp.add_argument("--status", default="open",
+                    help="open (default), all, or an exact status name")
+    sp.add_argument("--max", type=int, default=200, help="max results (default 200)")
+    sp.set_defaults(func=cmd_epics)
+
+    sp = sub.add_parser("epic", parents=[common], help="list an epic's child issues")
+    sp.add_argument("key")
+    sp.add_argument("--max", type=int, default=200, help="max results (default 200)")
+    sp.set_defaults(func=cmd_epic)
 
     sp = sub.add_parser("issue", parents=[common])
     sp.add_argument("key")
